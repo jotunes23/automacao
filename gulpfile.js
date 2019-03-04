@@ -5,6 +5,8 @@ const browserSync = require('browser-sync').create();
 const concat = require('gulp-concat');
 const babel = require('gulp-babel');
 const uglify = require('gulp-uglify');
+const svgo = require('gulp-svgo');
+
 
 // Funçao para compilar o SASS e adicionar os prefixos
 function compilaSass() {
@@ -54,15 +56,27 @@ function browser() {
 // Tarefa para iniciar o browser-sync
 gulp.task('browser-sync', browser);
 
+// Função para otimizar os SVG's
+function otimizarSVG() {
+  return gulp
+  .src('img/svg/*')
+  .pipe(svgo())
+  .pipe(gulp.dest('img/svg-otimizado'))
+  // .pipe(browserSync.reload());
+}
+
+gulp.task('otimizarSVG', otimizarSVG);
+
 // Função de watch do Gulp
 function watch() {
   gulp.watch('css/scss/*.scss', compilaSass);
   gulp.watch('js/main/*.js', gulpJS);
   gulp.watch(['*.html']).on('change', browserSync.reload);
+  gulp.watch('img/svg/*', otimizarSVG);
 }
 
 // Inicia a tarefa de watch
 gulp.task('watch', watch);
 
 // Tarefa padrão do Gulp, que inicia o watch e o browser-sync
-gulp.task('default', gulp.parallel('watch', 'browser-sync', 'sass', 'mainjs'));
+gulp.task('default', gulp.parallel('watch', 'otimizarSVG', 'browser-sync', 'sass', 'mainjs'));
